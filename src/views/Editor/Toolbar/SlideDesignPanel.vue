@@ -333,7 +333,7 @@ const moreThemeConfigsVisible = ref(false)
 const themeStylesExtractVisible = ref(false)
 
 const background = computed(() => {
-  if (!currentSlide.value.background) {
+  if (!currentSlide.value?.background) {
     return {
       type: 'solid',
       value: '#fff',

@@ -435,9 +435,14 @@ export default () => {
     reader.readAsArrayBuffer(file)
   }
 
+  const useExporting = (bool: boolean) => {
+    exporting.value = bool
+  }
+
   return {
     importSpecificFile,
     importPPTXFile,
     exporting,
+    useExporting
   }
 }

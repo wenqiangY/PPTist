@@ -3,7 +3,7 @@
     <div class="left">
       <Popover trigger="click" placement="bottom-start" v-model:value="mainMenuVisible">
         <template #content>
-          <FileInput accept=".pptist"  @change="files => {
+          <!-- <FileInput accept=".pptist"  @change="files => {
             importSpecificFile(files)
             mainMenuVisible = false
           }">
@@ -14,11 +14,11 @@
             mainMenuVisible = false
           }">
             <PopoverMenuItem>导入 pptx 文件（测试版）</PopoverMenuItem>
-          </FileInput>
+          </FileInput> -->
           <PopoverMenuItem @click="setDialogForExport('pptx')">导出文件</PopoverMenuItem>
           <PopoverMenuItem @click="resetSlides(); mainMenuVisible = false">重置幻灯片</PopoverMenuItem>
-          <PopoverMenuItem @click="goLink('https://github.com/pipipi-pikachu/PPTist/issues')">意见反馈</PopoverMenuItem>
-          <PopoverMenuItem @click="goLink('https://github.com/pipipi-pikachu/PPTist/blob/master/doc/Q&A.md')">常见问题</PopoverMenuItem>
+          <!-- <PopoverMenuItem @click="goLink('https://github.com/pipipi-pikachu/PPTist/issues')">意见反馈</PopoverMenuItem>
+          <PopoverMenuItem @click="goLink('https://github.com/pipipi-pikachu/PPTist/blob/master/doc/Q&A.md')">常见问题</PopoverMenuItem> -->
           <PopoverMenuItem @click="mainMenuVisible = false; hotkeyDrawerVisible = true">快捷键</PopoverMenuItem>
         </template>
         <div class="menu-item"><IconHamburgerButton class="icon" /></div>
@@ -57,9 +57,9 @@
       <div class="menu-item" v-tooltip="'导出'" @click="setDialogForExport('pptx')">
         <IconDownload class="icon" />
       </div>
-      <a class="github-link" v-tooltip="'Copyright © 2020-PRESENT pipipi-pikachu'" href="https://github.com/pipipi-pikachu/PPTist" target="_blank">
+      <!-- <a class="github-link" v-tooltip="'Copyright © 2020-PRESENT pipipi-pikachu'" href="https://github.com/pipipi-pikachu/PPTist" target="_blank">
         <div class="menu-item"><IconGithub class="icon" /></div>
-      </a>
+      </a> -->
     </div>
 
     <Drawer
@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainStore, useSlidesStore } from '@/store'
 import useScreening from '@/hooks/useScreening'
@@ -95,7 +95,7 @@ const mainStore = useMainStore()
 const slidesStore = useSlidesStore()
 const { title } = storeToRefs(slidesStore)
 const { enterScreening, enterScreeningFromStart } = useScreening()
-const { importSpecificFile, importPPTXFile, exporting } = useImport()
+const { importSpecificFile, importPPTXFile, exporting, useExporting } = useImport()
 const { resetSlides } = useSlideHandler()
 
 const mainMenuVisible = ref(false)
@@ -124,6 +124,48 @@ const setDialogForExport = (type: DialogForExportTypes) => {
   mainStore.setDialogForExport(type)
   mainMenuVisible.value = false
 }
+
+const getPPT = () => {
+  const [origin, search] = location.href.split('?')
+
+  if (!search) return ''
+
+  const [_, url] = search.split('=')
+
+  if (!url) return ''
+  useExporting(true)
+
+  const pptUrl = decodeURIComponent(url)
+  console.log(pptUrl)
+
+  fetch(pptUrl).then(response => response.blob()).then(res => {
+    console.log('文件下载成功：', res)
+    
+    // 定义文件名和类型
+    const fileName = pptUrl.split('/').pop() as string // 这里可以是动态获取或直接指定的文件名
+    const fileType = res.type // 根据实际情况设置MIME类型
+
+    // 创建File对象
+    const file = new File([res], fileName, {type: fileType})
+    
+    importPPTXFile([file] as any)
+    // importPPTXFile(arrayToFileList([file]))
+  }).catch(err => {
+    useExporting(false)
+    console.log('文件下载失败：', err)
+  })
+}
+
+function arrayToFileList(files: File[]): FileList {
+  // 实现FileList接口的关键属性和方法
+  return {
+    length: files.length,
+    item: (index: number) => index >= 0 && index < files.length ? files[index] : null,
+    [Symbol.iterator]: () => files[Symbol.iterator]() // 为了支持遍历
+  } as unknown as FileList
+}
+
+getPPT()
 </script>
 
 <style lang="scss" scoped>

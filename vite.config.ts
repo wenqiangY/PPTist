@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '',
+  base: '/pptx',
   plugins: [
     vue(),
   ],
@@ -23,5 +23,11 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  build: {
+    outDir: 'pptx',
+    // 输出的静态资源文件名
+    assetsDir: 'assets',
+    // 其他构建选项...
+  },
 })
