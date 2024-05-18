@@ -135,7 +135,7 @@ const getPPT = () => {
   if (!url) return ''
   useExporting(true)
 
-  const pptUrl = decodeURIComponent(url)
+  const pptUrl = decodeURIComponent(url).replace('https://bjcdn.openstorage.cn', 'https://www.xiyuaitool.com')
   console.log(pptUrl)
 
   fetch(pptUrl).then(response => response.blob()).then(res => {
